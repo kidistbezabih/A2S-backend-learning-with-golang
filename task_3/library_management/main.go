@@ -10,7 +10,15 @@ import (
 )
 
 func main() {
-	library := services.NewLibrary()
+	inmemorydb := services.NewLibrary()
+	postgresdb := services.NewPostgresLibrary()
+	var library services.LibraryManagement
+
+	if os.Getenv("DEPLOYMENT_TYPE") == "production"{
+		library = postgresdb
+	}else{
+		library = inmemorydb
+	}
 
 	for {
 		fmt.Println("\nLibrary Management System")
@@ -30,7 +38,30 @@ func main() {
 
 		switch option {
 		case "1":
-			var id int64
+			addBook(library)		 
+
+		case "2":
+			removeBookFromLib(library)
+
+		case "3":
+			borrowFrom(library)
+
+		case "4":
+			returnBookTo(library)
+
+		case "5":
+			availableBooksIn(library)
+		
+		case "6":
+			listOfBorrowedBooksFrom(library)
+
+		default:
+			fmt.Println("Invalid option. Please try again.")
+		}
+	}}
+
+func addBook(library services.LibraryManagement){
+	var id int64
 			var title, author string
 			var status string
 			fmt.Print("Enter book ID: ")
@@ -44,15 +75,16 @@ func main() {
 
 			book := models.Book{Id:id , Title: title, Author : author, Status : status}
 			library.AddBook(book)
-		 
+}
 
-		case "2":
+func removeBookFromLib(library services.LibraryManagement){
 			var id int64
 			fmt.Print("Enter book ID to remove: ")
 			fmt.Scanln(&id)
 			library.RemoveBook(id)
+}
 
-		case "3":
+func borrowFrom(library services.LibraryManagement){
 			var bookID, memberID int64
 			fmt.Print("Enter book ID to borrow: ")
 			fmt.Scanln(&bookID)
@@ -65,8 +97,10 @@ func main() {
 				fmt.Println("Book borrowed successfully.")
 			}
 
-		case "4":
-			var bookID, memberID int64
+}
+
+func returnBookTo(library services.LibraryManagement){
+	var bookID, memberID int64
 			fmt.Print("Enter book ID to return: ")
 			fmt.Scanln(&bookID)
 			fmt.Print("Enter member ID: ")
@@ -77,16 +111,20 @@ func main() {
 			} else {
 				fmt.Println("Book returned successfully.")
 			}
+}
 
-		case "5":
-			books := library.ListAvailableBooks()
+
+func availableBooks(library services.LibraryManagement){
+	books := library.ListAvailableBooks()
 			fmt.Println("Available Books:")
 			for _, book := range books {
 				fmt.Printf("ID: %d, Title: %s, Author: %s, Status: %s\n", book.Id, book.Title, book.Author, book.Status)
 			}
-		
-		case "6":
-			var memberID int64
+}
+
+
+func listOfBorrowedBooksFrom(library services.LibraryManagement){
+	var memberID int64
 			fmt.Print("Enter member ID to list borrowed books: ")
 			fmt.Scanln(&memberID)
 			books := library.ListBorrowedBooks(memberID)
@@ -94,9 +132,4 @@ func main() {
 			for _, book := range books {
 				fmt.Printf("ID: %d, Title: %s, Author: %s, Status: %s\n", book.Id, book.Title, book.Author, book.Status)
 			}
-
-		default:
-			fmt.Println("Invalid option. Please try again.")
-		}
-	}
 }
