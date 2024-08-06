@@ -1,18 +1,19 @@
-POST /tasks
-This endpoint is used to create a new task.
-Request Body
-id (number, required): The unique identifier for the task.
-title (string, required): The title of the task.
-description (string, required): The description of the task.
-completed (boolean, required): Indicates whether the task is completed or not.
+## POST /tasks
 
-Response
+This endpoint is used to create a new task.
+
+### Request Body
+
+- **id** (number, required): The unique identifier for the task.
+- **title** (string, required): The title of the task.
+- **description** (string, required): The description of the task.
+- **completed** (boolean, required): Indicates whether the task is completed or not.
+
+### Response
+
 The response is in JSON format with the following schema:
 
-
-JSON
-
-
+```json
 {
   "type": "object",
   "properties": {
@@ -21,63 +22,44 @@ JSON
     }
   }
 }
+```
 
+## Update Task
 
-message (string): A message indicating the status of the request.
+### Request
 
-Example
-Request Body:
+**PUT** `/tasks/:id`
 
+**Path Parameters:**
 
-JSON
+- `id` (integer, required): The ID of the task to retrieve.
 
+**Request Body:**
+
+```json
 {
-  "id": 0,
-  "title": "",
-  "description": "",
-  "completed": true
+  "title": "Updated Task 1",
+  "done": true
 }
+  ```
+## Delete Task
 
+### Request
 
-Response:
+**DELETE** `/tasks/:id`
 
+**Path Parameters:**
 
-JSON
+- `id` (integer, required): The ID of the task to retrieve.
 
+### Response
+
+**Status Code: 200 OK**
+
+**Response Body:**
+
+```json
 {
-  "message": ""
+  "message": "task deleted"
 }
-
-
-Status Code: 201
-Content-Type: application/json
-
-
-GET /tasks
-This endpoint retrieves a list of tasks.
-Request
-The request should be sent to localhost:8080/tasks using an HTTP GET method.
-Request Body
-id (number, required): The ID of the task.
-title (string, required): The title of the task.
-description (string, required): The description of the task.
-completed (boolean, required): Indicates whether the task is completed.
-
-Response
-Upon successful execution, the endpoint returns a status code of 200 and a JSON array with the following schema:
-
-
-JSON
-
-[
-    {
-        "id": "number",
-        "title": "string",
-        "description": "string",
-        "completed": "boolean"
-    }
-]
-
-
-
-
+```
