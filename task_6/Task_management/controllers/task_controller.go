@@ -20,10 +20,11 @@ func New(TaskManagement data.TaskManagement) TaskManagementStruct {
 }
 
 func (tm *TaskManagementStruct) GetAllTasks(ctx *gin.Context) {
+	// var username string
+	username, ok := ctx.Get("Username")
 	role, roleExists := ctx.Get("Role")
-	username, user_exist := ctx.Get("username")
 	var tasks []models.Task
-	var ok error
+	var err error
 
 	if !roleExists {
 		ctx.JSON(http.StatusNotFound, gin.H{"message": "status not found"})
@@ -31,14 +32,17 @@ func (tm *TaskManagementStruct) GetAllTasks(ctx *gin.Context) {
 	}
 
 	if role == "admin" {
-		tasks, ok = tm.TaskManagement.GetAllTasks()
-		if ok != nil {
+		tasks, err = tm.TaskManagement.GetAllTasks()
+		if err != nil {
 			ctx.JSON(http.StatusNotFound, gin.H{"message": "not found"})
 		}
-	} else if role == "user" {
-		tasks, ok = tm.TaskManagement.GetAUserTasks(username.(string))
-		if ok != nil {
-			ctx.JSON(http.StatusNotFound, user_exist)
+	} else {
+		if !ok {
+			ctx.JSON(http.StatusInternalServerError, gin.H{"message": "internal server error"})
+		}
+		tasks, err = tm.TaskManagement.GetAUserTasks(username.(string))
+		if err != nil {
+			ctx.JSON(http.StatusNotFound, err)
 		}
 	}
 	ctx.JSON(http.StatusOK, tasks)
@@ -91,13 +95,11 @@ func (tm *TaskManagementStruct) DeleteTaskById(ctx *gin.Context) {
 func (tm *TaskManagementStruct) CreateTask(ctx *gin.Context) {
 	var task models.Task
 
-	username := ctx.Param("username")
 	if err := ctx.ShouldBindJSON(&task); err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"message": "status bad req"})
+		ctx.JSON(http.StatusBadRequest, gin.H{"message": "status bad request"})
 		return
 	}
-
-	err := tm.TaskManagement.CreateTask(&task, username)
+	err := tm.TaskManagement.CreateTask(&task)
 	if err != nil {
 		ctx.JSON(http.StatusNotFound, gin.H{"message": "page not found"})
 		return

@@ -32,9 +32,10 @@ func CreateNewUser(userscollection *mongo.Collection, ctx context.Context) UserS
 }
 
 func (us *UserServices) RegisterUser(user *models.User) error {
-	filter := bson.D{bson.E{Key: "username", Value: us.UsersCollection}}
-	exist := us.UsersCollection.FindOne(us.ctx, filter)
-	if exist == nil {
+	var sample *models.User
+	filter := bson.D{bson.E{Key: "username", Value: user.UserName}}
+	err := us.UsersCollection.FindOne(us.ctx, filter).Decode(&sample)
+	if err == nil {
 		return errors.New("user already exist")
 	}
 

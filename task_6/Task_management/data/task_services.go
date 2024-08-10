@@ -14,7 +14,7 @@ type TaskManagement interface {
 	GetTaskById(id int) (models.Task, error)
 	UpdateTaskById(task *models.Task) error
 	DeleteTaskById(id int) error
-	CreateTask(task *models.Task, username string) error
+	CreateTask(task *models.Task) error
 	GetAUserTasks(username string) ([]models.Task, error)
 }
 
@@ -71,7 +71,6 @@ func (ts *TaskServices) GetTaskById(id int) (models.Task, error) {
 
 func (ts *TaskServices) UpdateTaskById(task *models.Task) error {
 	filter := bson.D{bson.E{Key: "id", Value: task.ID}}
-	// update := bson.D{bson.E{Key: "$set", Value: bson.E{Key: "id", Value: updatedtask.ID}, bson.E{Key: "title", Value: updatedtask.Title}, bson.E{Key: "description", Value: updatedtask.Description}, bson.E{Key: "completed", Value: updatedtask.Completed}}}
 	update := bson.D{bson.E{Key: "$set", Value: bson.D{bson.E{Key: "id", Value: task.ID}, bson.E{Key: "title", Value: task.Title}, bson.E{Key: "description", Value: task.Description}, bson.E{Key: "completed", Value: task.Completed}}}}
 	result, _ := ts.taskcollection.UpdateOne(ts.ctx, filter, update)
 
@@ -91,8 +90,7 @@ func (ts *TaskServices) DeleteTaskById(id int) error {
 	return nil
 }
 
-func (ts *TaskServices) CreateTask(task *models.Task, username string) error {
-	task.Username = username
+func (ts *TaskServices) CreateTask(task *models.Task) error {
 	_, err := ts.taskcollection.InsertOne(ts.ctx, task)
 	return err
 }
@@ -103,7 +101,7 @@ func (us *TaskServices) GetAUserTasks(username string) ([]models.Task, error) {
 	var tasks []models.Task
 
 	if err != nil {
-		return nil, err
+		return []models.Task{}, err
 	}
 	defer cursor.Close(us.ctx)
 
@@ -115,7 +113,6 @@ func (us *TaskServices) GetAUserTasks(username string) ([]models.Task, error) {
 			return []models.Task{}, err
 		}
 		tasks = append(tasks, task)
-
 	}
 
 	if err := cursor.Err(); err != nil {
@@ -123,7 +120,7 @@ func (us *TaskServices) GetAUserTasks(username string) ([]models.Task, error) {
 	}
 
 	if len(tasks) == 0 {
-		return nil, errors.New("no user with the username")
+		return tasks, errors.New("no user with the username")
 	}
 
 	return tasks, nil
